@@ -12,6 +12,8 @@ public class Order
 {
     @Id
     private String id;
+    private String customerId;
+    private String bookId;
     private LocalDate createdTime;
 
     public Order(LocalDate createdTime) {
