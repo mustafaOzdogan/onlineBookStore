@@ -1,9 +1,12 @@
 package app.domain;
 
+import app.dto.BookDTO;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+@Builder
 @Data
 @Document
 public class Book
@@ -12,9 +15,14 @@ public class Book
     private String id;
     private String name;
     private String author;
+    private String category;
 
-    public Book(String name, String author) {
-        this.name = name;
-        this.author = author;
+    public BookDTO toDTO() {
+        return BookDTO.builder()
+                .bookId(this.id)
+                .bookName(this.name)
+                .bookAuthor(this.author)
+                .bookCategory(this.category)
+                .build();
     }
 }
