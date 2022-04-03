@@ -1,4 +1,4 @@
-package app.main;
+package app;
 
 import app.domain.Book;
 import app.domain.Customer;
@@ -30,7 +30,12 @@ public class ReadingisgoodApplication
 		return args ->
 		{
 			// to create book collection in db
-			Book testBook = new Book("Test-Book-Name", "Test-Book-Author");
+			Book testBook = Book.builder()
+								.name("Test-Book-Name")
+								.author("Test-Book-Author")
+								.category("Test-Category")
+								.build();
+
 			bookRepository.insert(testBook);
 
 			// to create order collection in db
@@ -38,10 +43,12 @@ public class ReadingisgoodApplication
 			orderRepository.insert(testOrder);
 
 			// to create customer collection in db
-			Customer testCustomer = new Customer("Test-Customer-Name",
-												 "Test-Customer-Surname",
-												 1,
-												 LocalDate.now());
+			Customer testCustomer = Customer.builder()
+											.name("Test-Customer-Name")
+											.surname("Test-Customer-Surname")
+											.createdTime(LocalDate.now())
+											.build();
+
 			customerRepository.insert(testCustomer);
 		};
 	}
