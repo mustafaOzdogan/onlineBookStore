@@ -6,11 +6,12 @@ import app.api.request.GetOrderInIntervalRequest;
 import app.api.response.BaseApiResponse;
 import app.service.OrderService;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping(value = ApiEndpoints.ORDER_API,
@@ -23,7 +24,7 @@ public class OrderController
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseApiResponse createOrder(@RequestBody CreateOrderRequest request) {
+    public BaseApiResponse createOrder(@Valid @RequestBody CreateOrderRequest request) {
         return orderService.createOrder(request);
     }
 
@@ -35,7 +36,7 @@ public class OrderController
 
     @PostMapping(value = "/interval")
     @ResponseStatus(HttpStatus.OK)
-    public BaseApiResponse getOrderInInterval(@RequestBody GetOrderInIntervalRequest request) {
+    public BaseApiResponse getOrderInInterval(@Valid @RequestBody GetOrderInIntervalRequest request) {
         return orderService.getOrderInInterval(request);
     }
 }

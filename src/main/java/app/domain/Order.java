@@ -7,8 +7,6 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
-
 @Data
 @Document
 @Builder
@@ -18,13 +16,13 @@ public class Order
     private String id;
     private String customerId;
     private String bookId;
-    private LocalDate createdTime;
+    private String createdTime;
     private OrderStatus status;
 
     public OrderDTO toDTO() {
         return OrderDTO.builder()
                 .orderId(this.id)
-                .orderByCustomerId(this.customerId)
+                .orderedByCustomerId(this.customerId)
                 .orderedBookId(this.bookId)
                 .orderCreateTime(this.createdTime)
                 .orderStatus(this.status).build();

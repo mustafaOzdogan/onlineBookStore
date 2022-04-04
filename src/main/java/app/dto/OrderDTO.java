@@ -11,8 +11,8 @@ import java.time.LocalDate;
 public class OrderDTO
 {
     private String orderId;
-    private String orderByCustomerId;
+    private String orderedByCustomerId;
     private String orderedBookId;
-    private LocalDate orderCreateTime;
+    private String orderCreateTime;
     private OrderStatus orderStatus;
 }
