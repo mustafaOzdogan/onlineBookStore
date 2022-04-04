@@ -1,12 +1,9 @@
 package app.api.controller;
 
 import app.api.constans.ApiEndpoints;
-import app.api.request.BaseApiRequest;
-import app.api.request.BookCreateRequest;
-import app.api.request.BookStockUpdateRequest;
-import app.api.request.CustomerCreateRequest;
+import app.api.request.CreateBookRequest;
+import app.api.request.UpdateBookStockRequest;
 import app.api.response.BaseApiResponse;
-import app.domain.BookStock;
 import app.service.BookService;
 import app.service.BookStockService;
 import lombok.AllArgsConstructor;
@@ -27,14 +24,14 @@ public class BookController
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseApiResponse createBook(@RequestBody BookCreateRequest request) {
+    public BaseApiResponse createBook(@RequestBody CreateBookRequest request) {
         return bookService.createBook(request);
     }
 
     @PatchMapping(value = "/{id}/stocks")
     @ResponseStatus(HttpStatus.OK)
     public BaseApiResponse updateBookStockQuantity(@PathVariable String id,
-                                                   @RequestBody BookStockUpdateRequest request) {
+                                                   @RequestBody UpdateBookStockRequest request) {
         return bookStockService.updateStockQuantity(id, request);
     }
 }

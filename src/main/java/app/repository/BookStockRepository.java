@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface BookStockRepository extends MongoRepository<BookStock, String>
 {
     Optional<BookStock> findBookStockByBookID(String bookId);
+    boolean existsByBookIDAndAndQuantityGreaterThanEqual(String bookId, int quantity);
 }
