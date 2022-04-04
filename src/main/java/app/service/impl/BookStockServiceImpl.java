@@ -33,8 +33,9 @@ public class BookStockServiceImpl implements BookStockService
 
             // get bookstock by book id if exist or create new one
             bookStockRepository.findBookStockByBookID(bookDTO.getBookId())
-                    .ifPresentOrElse(bookStock -> { setBookStock(bookId, request.getBookStockQuantity()); },
-                                     () -> { createBookStock(bookId, request.getBookStockQuantity()); });
+                    .ifPresentOrElse(bookStock -> {
+                        setBookStock(bookStock, request.getBookStockQuantity()); },
+                            () -> { createBookStock(bookId, request.getBookStockQuantity()); });
 
             response.setResponseMessage("Book stock is updated successfully.");
         }
@@ -47,46 +48,34 @@ public class BookStockServiceImpl implements BookStockService
         return response;
     }
 
-    @SneakyThrows
-    @Override
-    public boolean hasAvailableStock(String bookId, int stockQuantity)
-    {
-        if(bookId.isEmpty() || Objects.isNull(bookId)) {
-            throw new Exception("Book identity code not found.");
-        }
-
-        boolean hasAvailableStock = bookStockRepository
-                .existsByBookIDAndAndQuantityGreaterThanEqual(bookId, stockQuantity);
-
-        return hasAvailableStock;
-    }
-
-    private void changeBookStock(String bookId, int stockChange)
-    {
-        bookStockRepository.findBookStockByBookID(bookId)
-                .ifPresentOrElse(bookStock -> {
-                        int newStockQuantity = bookStock.getQuantity() + stockChange;
-                        bookStock.setQuantity(newStockQuantity);
-                        bookStockRepository.save(bookStock);
-                    },
-                        () -> new Exception("Book stock could not found."));
-    }
-
     private void createBookStock(String bookId, int stockQuantity)
     {
         BookStock newBookStock = BookStock.builder()
                 .bookID(bookId)
                 .quantity(stockQuantity)
-                .lastUpdatedTime(LocalDate.now()).build();
+                .lastUpdatedTime(LocalDate.now().toString()).build();
         bookStockRepository.insert(newBookStock);
     }
 
-    private void setBookStock(String bookId, int stockQuantity)
+    @Override
+    public void setBookStock(BookStock bookStock, int stockQuantity)
     {
-        BookStock newBookStock = BookStock.builder()
-                .bookID(bookId)
-                .quantity(stockQuantity)
-                .lastUpdatedTime(LocalDate.now()).build();
-        bookStockRepository.save(newBookStock);
+        bookStock.setQuantity(stockQuantity);
+        bookStock.setLastUpdatedTime(LocalDate.now().toString());
+        bookStockRepository.save(bookStock);
+    }
+
+    @SneakyThrows
+    @Override
+    public BookStock getBookStockIfExist(String bookId)
+    {
+        if(bookId.isEmpty() || Objects.isNull(bookId)) {
+            throw new Exception("Book identity code not found.");
+        }
+
+        BookStock bookstock = bookStockRepository.findBookStockByBookID(bookId)
+                .orElseThrow(() -> new Exception("Book stock could not found"));
+
+        return bookstock;
     }
 }
