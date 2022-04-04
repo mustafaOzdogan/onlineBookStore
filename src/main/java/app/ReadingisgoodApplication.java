@@ -39,7 +39,7 @@ public class ReadingisgoodApplication
 			bookRepository.insert(testBook);
 
 			// to create order collection in db
-			Order testOrder = new Order(LocalDate.now());
+			Order testOrder = Order.builder().build();
 			orderRepository.insert(testOrder);
 
 			// to create customer collection in db
