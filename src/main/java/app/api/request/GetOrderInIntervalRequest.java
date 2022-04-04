@@ -4,7 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
@@ -12,9 +12,9 @@ import java.time.LocalDate;
 @Setter
 public class GetOrderInIntervalRequest extends BaseApiRequest
 {
-    @NotNull
+    @NotBlank(message = "Start date is mandatory")
     private LocalDate startDate;
 
-    @NotNull
+    @NotBlank(message = "End date is mandatory")
     private LocalDate endDate;
 }
