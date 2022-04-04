@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping(value = ApiEndpoints.CUSTOMER_API,
                 produces = {ApiEndpoints.RESPONSE_CONTENT_TYPE})
@@ -27,7 +29,7 @@ public class CustomerController
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseApiResponse createCustomer(@RequestBody CreateCustomerRequest request) {
+    public BaseApiResponse createCustomer(@Valid @RequestBody CreateCustomerRequest request) {
         return customerService.createCustomer(request);
     }
 }
