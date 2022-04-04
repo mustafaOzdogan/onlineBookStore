@@ -29,8 +29,7 @@ public class BookServiceImpl implements BookService
         {
             Book newBook = Book.builder()
                                .name(request.getBookName())
-                               .author(request.getBookAuthor())
-                               .category(request.getBookCategory()).build();
+                               .author(request.getBookAuthor()).build();
 
             newBook = bookRepository.insert(newBook);
             BookDTO newBookDTO = newBook.toDTO();

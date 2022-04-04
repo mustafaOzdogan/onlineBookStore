@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping(value = ApiEndpoints.BOOK_API,
                 produces = {ApiEndpoints.RESPONSE_CONTENT_TYPE})
@@ -24,14 +26,14 @@ public class BookController
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseApiResponse createBook(@RequestBody CreateBookRequest request) {
+    public BaseApiResponse createBook(@Valid @RequestBody CreateBookRequest request) {
         return bookService.createBook(request);
     }
 
     @PatchMapping(value = "/{id}/stocks")
     @ResponseStatus(HttpStatus.OK)
     public BaseApiResponse updateBookStockQuantity(@PathVariable String id,
-                                                   @RequestBody UpdateBookStockRequest request) {
+                                                   @Valid @RequestBody UpdateBookStockRequest request) {
         return bookStockService.updateStockQuantity(id, request);
     }
 }
