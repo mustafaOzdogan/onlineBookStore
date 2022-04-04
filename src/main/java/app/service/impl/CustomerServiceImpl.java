@@ -1,6 +1,6 @@
 package app.service.impl;
 
-import app.api.request.CustomerCreateRequest;
+import app.api.request.CreateCustomerRequest;
 import app.api.response.BaseApiResponse;
 import app.domain.Customer;
 import app.dto.CustomerDTO;
@@ -8,7 +8,6 @@ import app.repository.CustomerRepository;
 import app.service.CustomerService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -48,7 +47,7 @@ public class CustomerServiceImpl implements CustomerService
     }
 
     @Override
-    public BaseApiResponse createCustomer(CustomerCreateRequest request)
+    public BaseApiResponse createCustomer(CreateCustomerRequest request)
     {
         BaseApiResponse response = new BaseApiResponse.Builder().build();
 

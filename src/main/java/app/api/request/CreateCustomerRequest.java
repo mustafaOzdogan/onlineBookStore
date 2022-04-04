@@ -10,8 +10,7 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
-@Builder
-public class CustomerCreateRequest extends BaseApiRequest
+public class CreateCustomerRequest extends BaseApiRequest
 {
     @NotNull
     private String customerName;

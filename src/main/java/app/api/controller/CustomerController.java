@@ -1,7 +1,7 @@
 package app.api.controller;
 
 import app.api.constans.ApiEndpoints;
-import app.api.request.CustomerCreateRequest;
+import app.api.request.CreateCustomerRequest;
 import app.api.response.BaseApiResponse;
 import app.service.CustomerService;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ public class CustomerController
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseApiResponse createCustomer(@RequestBody CustomerCreateRequest request) {
+    public BaseApiResponse createCustomer(@RequestBody CreateCustomerRequest request) {
         return customerService.createCustomer(request);
     }
 }
