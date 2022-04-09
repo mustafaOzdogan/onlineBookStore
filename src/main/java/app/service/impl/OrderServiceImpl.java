@@ -6,21 +6,23 @@ import app.api.response.BaseApiResponse;
 import app.domain.BookStock;
 import app.domain.Order;
 import app.dto.BookDTO;
+import app.dto.BookOrderDTO;
+import app.dto.CustomerDTO;
 import app.dto.OrderDTO;
 import app.dto.enums.OrderStatus;
 import app.repository.OrderRepository;
 import app.service.BookService;
 import app.service.BookStockService;
+import app.service.CustomerService;
 import app.service.OrderService;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,37 +31,81 @@ public class OrderServiceImpl implements OrderService
 {
     private BookService bookService;
     private OrderRepository orderRepository;
+    private CustomerService customerService;
     private BookStockService bookStockService;
 
     @Override
     public BaseApiResponse createOrder(CreateOrderRequest request)
     {
         BaseApiResponse response = new BaseApiResponse.Builder().build();
-        Map<String, String> responseMessages = new HashMap<>();
 
-        request.getBooks().stream().forEach(bookOrder ->
+        try
         {
-            try
-            {
-                BookDTO book = bookService.getBookIfExist(bookOrder.getBookId());
+            CustomerDTO customerDTO = customerService.getCustomerIfExist(request.getCustomerId());
 
-                reduceBookStockIfExist(bookOrder.getBookId(), bookOrder.getNumberOfBookOrdered());
-                createOrderDocument(bookOrder.getBookId(), request.getCustomerId());
+            List<String> bookIds = request.getBookOrders().parallelStream()
+                    .map(bookOrder -> bookOrder.getBookId()).collect(Collectors.toList());
 
-                responseMessages.put(bookOrder.getBookId(), "Orders are successfully completed.");
-            }
-            catch (OptimisticLockingFailureException ofe) {
-                responseMessages.put(bookOrder.getBookId(), "Orders could not successfully completed " +
-                        "due to stock quantity is changed.");
-            }
-            catch (Exception e) {
-                responseMessages.put(bookOrder.getBookId(), "Orders could not successfully completed:"
-                        + e.getMessage());
-            }
-        });
+            // check ordered books are exist
+            List<BookDTO> books = bookService.getBooksIfExist(bookIds);
 
-        response.setData(responseMessages);
+            List<BookStock> bookStocks = bookStockService.getBookStocks(bookIds);
+
+            // check all of the books in order whether they have enough stock
+            checkBookStocksIsEnough(bookStocks, request.getBookOrders());
+
+            Map<String, Integer> bookIdOrderQuantityMapping = request.getBookOrders().parallelStream()
+                    .collect(Collectors.toMap(BookOrderDTO::getBookId, BookOrderDTO::getNumberOfBookOrdered));
+
+            bookStocks.parallelStream().forEach(bookStock -> {
+                int reducedBookStock = bookIdOrderQuantityMapping.get(bookStock.getBookID());
+                reduceBookStock(bookStock, reducedBookStock);
+            });
+
+            createOrderDocument(request.getBookOrders(), customerDTO.getCustomerId());
+
+            response.setResponseMessage("Order step is successfully completed.");
+        }
+        catch (Exception e) {
+            response.setSuccess(false);
+            response.setErrorMessage(e.getMessage());
+            response.setResponseMessage("Order step could not successfully completed.");
+        }
+
         return response;
+    }
+
+    @SneakyThrows
+    private void checkBookStocksIsEnough(List<BookStock> bookStocks, List<BookOrderDTO> bookOrders)
+    {
+        Map<String, Integer> bookIdStockQuantityMapping = bookStocks.parallelStream()
+                .collect(Collectors.toMap(BookStock::getBookID, BookStock::getQuantity));
+
+        Predicate<BookOrderDTO> stockNotEnoughCondition = order ->
+                bookIdStockQuantityMapping.get(order.getBookId()) < order.getNumberOfBookOrdered();
+
+        Optional<BookOrderDTO> insufficientStock = bookOrders.parallelStream()
+                .filter(stockNotEnoughCondition).findFirst();
+
+        if(insufficientStock.isPresent())
+            throw new Exception("Stock not enough for book with id :" + insufficientStock.get().getBookId());
+    }
+
+    private void createOrderDocument(List<BookOrderDTO> bookOrderDTOS, String customerId) {
+        Order newOrder = Order.builder()
+                .books(bookOrderDTOS)
+                .customerId(customerId)
+                .status(OrderStatus.OPENED)
+                .createdTime(LocalDate.now().toString()).build();
+
+        orderRepository.insert(newOrder);
+    }
+
+    @SneakyThrows
+    private void reduceBookStock(BookStock bookStock, int numberOfBookOrdered)
+    {
+        int newStockQuantity = bookStock.getQuantity() - numberOfBookOrdered;
+        bookStockService.setBookStock(bookStock, newStockQuantity);
     }
 
     @Override
@@ -126,29 +172,5 @@ public class OrderServiceImpl implements OrderService
         }
 
         return response;
-    }
-
-    private void createOrderDocument(String bookId, String customerId) {
-        Order newOrder = Order.builder()
-                .bookId(bookId)
-                .customerId(customerId)
-                .status(OrderStatus.OPENED)
-                .createdTime(LocalDate.now().toString()).build();
-
-        orderRepository.insert(newOrder);
-    }
-
-    @SneakyThrows
-    private void reduceBookStockIfExist(String bookId, int numberOfBookOrdered)
-    {
-        BookStock bookStock = bookStockService.getBookStockIfExist(bookId);
-
-        boolean isBookHasEnoughStock = bookStock.getQuantity() - numberOfBookOrdered >= 0;
-
-        if(!isBookHasEnoughStock)
-            throw new Exception("Stock is not enough for book:" + bookId);
-
-        int newStockQuantity = bookStock.getQuantity() - numberOfBookOrdered;
-        bookStockService.setBookStock(bookStock, newStockQuantity);
     }
 }
