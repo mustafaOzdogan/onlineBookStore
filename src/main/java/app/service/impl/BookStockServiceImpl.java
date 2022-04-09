@@ -7,6 +7,7 @@ import app.dto.BookDTO;
 import app.repository.BookStockRepository;
 import app.service.BookService;
 import app.service.BookStockService;
+import app.util.ApiResponseUtil;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -27,8 +27,6 @@ public class BookStockServiceImpl implements BookStockService
     @Override
     public BaseApiResponse updateStockQuantity(String bookId, UpdateBookStockRequest request)
     {
-        BaseApiResponse response = new BaseApiResponse.Builder().build();
-
         try
         {
             BookDTO bookDTO = bookService.getBookIfExist(bookId);
@@ -39,15 +37,13 @@ public class BookStockServiceImpl implements BookStockService
                         setBookStock(bookStock, request.getBookStockQuantity()); },
                             () -> { createBookStock(bookId, request.getBookStockQuantity()); });
 
-            response.setResponseMessage("Book stock is updated successfully.");
+            return ApiResponseUtil.sendSuccessfulServiceResponse(null,
+                    "Book stock is updated successfully.");
         }
         catch (Exception e) {
-            response.setSuccess(false);
-            response.setErrorMessage(e.getMessage());
-            response.setResponseMessage("Book stock could not updated successfully.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
+                    "Book stock could not updated successfully.");
         }
-
-        return response;
     }
 
     private void createBookStock(String bookId, int stockQuantity)

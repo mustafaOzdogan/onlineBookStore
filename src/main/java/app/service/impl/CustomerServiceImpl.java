@@ -6,6 +6,7 @@ import app.domain.Customer;
 import app.dto.CustomerDTO;
 import app.repository.CustomerRepository;
 import app.service.CustomerService;
+import app.util.ApiResponseUtil;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,6 @@ public class CustomerServiceImpl implements CustomerService
     @Override
     public BaseApiResponse getCustomers()
     {
-        BaseApiResponse response = new BaseApiResponse.Builder().build();
-
         try
         {
             List<Customer> customers = customerRepository.findAll();
@@ -35,24 +34,23 @@ public class CustomerServiceImpl implements CustomerService
                 List<CustomerDTO> customerDTOS = customers.
                         parallelStream().map(Customer::toDTO).collect(Collectors.toList());
 
-                response.setData(customerDTOS);
-                response.setResponseMessage("Customers are found successfully.");
+                return ApiResponseUtil.sendSuccessfulServiceResponse(customerDTOS,
+                        "Customers are found successfully.");
+            }
+            else {
+                return ApiResponseUtil.sendSuccessfulServiceResponse(null,
+                        "There is no any customers.");
             }
         }
         catch (Exception e) {
-            response.setSuccess(false);
-            response.setErrorMessage(e.getMessage());
-            response.setResponseMessage("While fetching customers, an error occured.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
+                    "While fetching customers, an error occured.");
         }
-
-        return response;
     }
 
     @Override
     public BaseApiResponse createCustomer(CreateCustomerRequest request)
     {
-        BaseApiResponse response = new BaseApiResponse.Builder().build();
-
         try
         {
             Customer newCustomer = Customer.builder()
@@ -64,16 +62,13 @@ public class CustomerServiceImpl implements CustomerService
             newCustomer = customerRepository.insert(newCustomer);
             CustomerDTO newCustomerDTO = newCustomer.toDTO();
 
-            response.setData(newCustomerDTO);
-            response.setResponseMessage("Customer is registered successfully.");
+            return ApiResponseUtil.sendSuccessfulServiceResponse(newCustomerDTO,
+                    "Customer is registered successfully.");
         }
         catch (Exception e) {
-            response.setSuccess(false);
-            response.setErrorMessage(e.getMessage());
-            response.setResponseMessage("Customer could not registered successfully.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
+                    "Customer could not registered successfully.");
         }
-
-        return response;
     }
 
     @SneakyThrows

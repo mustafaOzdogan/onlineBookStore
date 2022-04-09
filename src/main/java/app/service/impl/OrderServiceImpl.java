@@ -15,11 +15,14 @@ import app.service.BookService;
 import app.service.BookStockService;
 import app.service.CustomerService;
 import app.service.OrderService;
+import app.util.ApiResponseUtil;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Predicate;
@@ -35,10 +38,9 @@ public class OrderServiceImpl implements OrderService
     private BookStockService bookStockService;
 
     @Override
+    @Transactional
     public BaseApiResponse createOrder(CreateOrderRequest request)
     {
-        BaseApiResponse response = new BaseApiResponse.Builder().build();
-
         try
         {
             CustomerDTO customerDTO = customerService.getCustomerIfExist(request.getCustomerId());
@@ -62,17 +64,15 @@ public class OrderServiceImpl implements OrderService
                 reduceBookStock(bookStock, reducedBookStock);
             });
 
-            createOrderDocument(request.getBookOrders(), customerDTO.getCustomerId());
+            createOrderDocument(books, request.getBookOrders(), customerDTO.getCustomerId());
 
-            response.setResponseMessage("Order step is successfully completed.");
+            return ApiResponseUtil.sendSuccessfulServiceResponse(null,
+                    "Order step is successfully completed.");
         }
         catch (Exception e) {
-            response.setSuccess(false);
-            response.setErrorMessage(e.getMessage());
-            response.setResponseMessage("Order step could not successfully completed.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
+                    "Order step could not successfully completed.");
         }
-
-        return response;
     }
 
     @SneakyThrows
@@ -91,11 +91,22 @@ public class OrderServiceImpl implements OrderService
             throw new Exception("Stock not enough for book with id :" + insufficientStock.get().getBookId());
     }
 
-    private void createOrderDocument(List<BookOrderDTO> bookOrderDTOS, String customerId) {
+    private void createOrderDocument(List<BookDTO> books, List<BookOrderDTO> bookOrders, String customerId)
+    {
+        Map<String, BigDecimal> bookIdPriceMapping = books.parallelStream()
+                .collect(Collectors.toMap(BookDTO::getBookId, BookDTO::getBookPrice));
+
+        // sum of all book prices in the order
+        BigDecimal totalPrice = bookOrders.parallelStream()
+                .map(bookOrder -> bookIdPriceMapping.get(bookOrder.getBookId())
+                        .multiply(BigDecimal.valueOf(bookOrder.getNumberOfBookOrdered())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         Order newOrder = Order.builder()
-                .books(bookOrderDTOS)
+                .books(bookOrders)
                 .customerId(customerId)
                 .status(OrderStatus.OPENED)
+                .totalPrice(totalPrice)
                 .createdTime(LocalDate.now().toString()).build();
 
         orderRepository.insert(newOrder);
@@ -111,21 +122,17 @@ public class OrderServiceImpl implements OrderService
     @Override
     public BaseApiResponse getOrder(String orderId)
     {
-        BaseApiResponse response = new BaseApiResponse.Builder().build();
-
         try
         {
             OrderDTO order = getOrderIfExist(orderId);
-            response.setData(order);
-            response.setResponseMessage("Order is retrieved successfully.");
+
+            return ApiResponseUtil.sendSuccessfulServiceResponse(order,
+                    "Order is retrieved successfully.");
         }
         catch (Exception e) {
-            response.setSuccess(false);
-            response.setErrorMessage(e.getMessage());
-            response.setResponseMessage("Order could not retrieved successfully.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
+                    "Order could not retrieved successfully.");
         }
-
-        return response;
     }
 
     @SneakyThrows
@@ -145,8 +152,6 @@ public class OrderServiceImpl implements OrderService
     @Override
     public BaseApiResponse getOrderInInterval(GetOrderInIntervalRequest request)
     {
-        BaseApiResponse response = new BaseApiResponse.Builder().build();
-
         try
         {
             String minusStartDate = request.getStartDate().minusDays(1).toString();
@@ -159,18 +164,18 @@ public class OrderServiceImpl implements OrderService
             {
                 List<OrderDTO> orderDTOS = orders.get().parallelStream().map(Order::toDTO)
                         .collect(Collectors.toList());
-                response.setData(orderDTOS);
-                response.setResponseMessage("Orders in date interval successfully retrieved.");
+
+                return ApiResponseUtil.sendSuccessfulServiceResponse(orderDTOS,
+                        "Orders in date interval successfully retrieved.");
             }
-            else
-                response.setResponseMessage("There is no any order in that date interval.");
+            else {
+                return ApiResponseUtil.sendSuccessfulServiceResponse(null,
+                        "There is no any order in that date interval.");
+            }
         }
         catch (Exception e) {
-            response.setSuccess(false);
-            response.setErrorMessage(e.getMessage());
-            response.setResponseMessage("Order could not retrieved successfully.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
+                    "Order could not retrieved successfully.");
         }
-
-        return response;
     }
 }

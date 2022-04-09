@@ -6,6 +6,7 @@ import app.domain.Book;
 import app.dto.BookDTO;
 import app.repository.BookRepository;
 import app.service.BookService;
+import app.util.ApiResponseUtil;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,27 +26,23 @@ public class BookServiceImpl implements BookService
     @Override
     public BaseApiResponse createBook(CreateBookRequest request)
     {
-        BaseApiResponse response = new BaseApiResponse.Builder().build();
-
         try
         {
             Book newBook = Book.builder()
                                .name(request.getBookName())
-                               .author(request.getBookAuthor()).build();
+                               .author(request.getBookAuthor())
+                               .price(request.getBookPrice()).build();
 
             newBook = bookRepository.insert(newBook);
             BookDTO newBookDTO = newBook.toDTO();
 
-            response.setData(newBookDTO);
-            response.setResponseMessage("Book is registered successfully.");
+            return ApiResponseUtil.sendSuccessfulServiceResponse(newBookDTO,
+                    "Book is registered successfully.");
         }
         catch (Exception e) {
-            response.setSuccess(false);
-            response.setErrorMessage(e.getMessage());
-            response.setResponseMessage("Book could not registered successfully.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
+                    "Book could not registered successfully.");
         }
-
-        return response;
     }
 
     @SneakyThrows
@@ -73,7 +70,7 @@ public class BookServiceImpl implements BookService
                 .orElseThrow(() -> new Exception("Books could not found."));
 
         if(books.size() != bookIds.size())
-            throw new Exception("There are book identity that could not found.");
+            throw new Exception("There are book identities that could not found.");
 
         return books.parallelStream().map(Book::toDTO).collect(Collectors.toList());
     }
