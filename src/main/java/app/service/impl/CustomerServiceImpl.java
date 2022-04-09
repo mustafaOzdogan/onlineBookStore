@@ -7,11 +7,13 @@ import app.dto.CustomerDTO;
 import app.repository.CustomerRepository;
 import app.service.CustomerService;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +58,7 @@ public class CustomerServiceImpl implements CustomerService
             Customer newCustomer = Customer.builder()
                                            .name(request.getCustomerName())
                                            .surname(request.getCustomerSurname())
-                                           .createdTime(LocalDate.now())
+                                           .createdTime(LocalDate.now().toString())
                                            .build();
 
             newCustomer = customerRepository.insert(newCustomer);
@@ -72,5 +74,19 @@ public class CustomerServiceImpl implements CustomerService
         }
 
         return response;
+    }
+
+    @SneakyThrows
+    @Override
+    public CustomerDTO getCustomerIfExist(String customerId)
+    {
+        if(customerId.isEmpty() || Objects.isNull(customerId)) {
+            throw new Exception("Customer identity code not found.");
+        }
+
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new Exception("Customer could not found"));
+
+        return customer.toDTO();
     }
 }

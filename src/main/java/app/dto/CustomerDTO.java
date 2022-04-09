@@ -8,5 +8,5 @@ import lombok.Data;
 public class CustomerDTO {
     private String customerName;
     private String customerSurname;
-    private String customerNumber;
+    private String customerId;
 }

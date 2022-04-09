@@ -19,13 +19,13 @@ public class Customer
     private String id;
     private String name;
     private String surname;
-    private LocalDate createdTime;
+    private String createdTime;
 
     public CustomerDTO toDTO() {
         return CustomerDTO.builder()
                 .customerName(this.name)
                 .customerSurname(this.surname)
-                .customerNumber(this.id)
+                .customerId(this.id)
                 .build();
     }
 }
