@@ -10,6 +10,7 @@ import app.dto.BookOrderDTO;
 import app.dto.CustomerDTO;
 import app.dto.OrderDTO;
 import app.dto.enums.OrderStatus;
+import app.exception.ApiError;
 import app.repository.OrderRepository;
 import app.service.BookService;
 import app.service.BookStockService;
@@ -70,8 +71,7 @@ public class OrderServiceImpl implements OrderService
                     "Order step is successfully completed.");
         }
         catch (Exception e) {
-            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
-                    "Order step could not successfully completed.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e, ApiError.ORDER_NOT_COMPLETED);
         }
     }
 
@@ -130,8 +130,7 @@ public class OrderServiceImpl implements OrderService
                     "Order is retrieved successfully.");
         }
         catch (Exception e) {
-            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
-                    "Order could not retrieved successfully.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e, ApiError.ORDER_NOT_RETRIEVED);
         }
     }
 
@@ -175,7 +174,7 @@ public class OrderServiceImpl implements OrderService
         }
         catch (Exception e) {
             return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
-                    "Order could not retrieved successfully.");
+                    ApiError.ORDER_NOT_RETRIEVED);
         }
     }
 }

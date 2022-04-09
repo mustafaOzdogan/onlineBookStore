@@ -4,6 +4,7 @@ import app.api.request.UpdateBookStockRequest;
 import app.api.response.BaseApiResponse;
 import app.domain.BookStock;
 import app.dto.BookDTO;
+import app.exception.ApiError;
 import app.repository.BookStockRepository;
 import app.service.BookService;
 import app.service.BookStockService;
@@ -41,8 +42,7 @@ public class BookStockServiceImpl implements BookStockService
                     "Book stock is updated successfully.");
         }
         catch (Exception e) {
-            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
-                    "Book stock could not updated successfully.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e, ApiError.BOOK_STOCK_NOT_UPDATED);
         }
     }
 

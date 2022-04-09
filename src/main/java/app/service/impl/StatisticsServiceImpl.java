@@ -2,6 +2,7 @@ package app.service.impl;
 
 import app.api.response.BaseApiResponse;
 import app.dto.CustomerDTO;
+import app.exception.ApiError;
 import app.service.CustomerService;
 import app.service.StatisticsService;
 import app.util.ApiResponseUtil;
@@ -26,7 +27,7 @@ public class StatisticsServiceImpl implements StatisticsService
         }
         catch (Exception e) {
             return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
-                    "Customer order statistics could not retrieved successfully.");
+                    ApiError.CUSTOMER_ORDER_STATISTICS_NOT_RETRIEVED);
         }
     }
 }

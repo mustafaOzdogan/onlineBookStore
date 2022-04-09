@@ -4,6 +4,7 @@ import app.api.request.CreateBookRequest;
 import app.api.response.BaseApiResponse;
 import app.domain.Book;
 import app.dto.BookDTO;
+import app.exception.ApiError;
 import app.repository.BookRepository;
 import app.service.BookService;
 import app.util.ApiResponseUtil;
@@ -40,8 +41,7 @@ public class BookServiceImpl implements BookService
                     "Book is registered successfully.");
         }
         catch (Exception e) {
-            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
-                    "Book could not registered successfully.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e, ApiError.BOOK_NOT_REGISTERED);
         }
     }
 

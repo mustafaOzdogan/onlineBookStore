@@ -4,6 +4,7 @@ import app.api.request.CreateCustomerRequest;
 import app.api.response.BaseApiResponse;
 import app.domain.Customer;
 import app.dto.CustomerDTO;
+import app.exception.ApiError;
 import app.repository.CustomerRepository;
 import app.service.CustomerService;
 import app.util.ApiResponseUtil;
@@ -43,8 +44,7 @@ public class CustomerServiceImpl implements CustomerService
             }
         }
         catch (Exception e) {
-            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
-                    "While fetching customers, an error occured.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e, ApiError.CUSTOMER_NOT_FETCHED);
         }
     }
 
@@ -66,8 +66,7 @@ public class CustomerServiceImpl implements CustomerService
                     "Customer is registered successfully.");
         }
         catch (Exception e) {
-            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e,
-                    "Customer could not registered successfully.");
+            return ApiResponseUtil.sendUnsuccessfulServiceResponse(e, ApiError.CUSTOMER_NOT_REGISTERED);
         }
     }
 
