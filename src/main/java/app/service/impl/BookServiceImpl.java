@@ -11,7 +11,9 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -58,5 +60,21 @@ public class BookServiceImpl implements BookService
                 .orElseThrow(() -> new Exception("Book could not found"));
 
         return book.toDTO();
+    }
+
+    @SneakyThrows
+    @Override
+    public List<BookDTO> getBooksIfExist(List<String> bookIds)
+    {
+        if(bookIds.isEmpty() || Objects.isNull(bookIds))
+            throw new Exception("Book identity list cannot be empty.");
+
+        List<Book> books = bookRepository.findByIdIn(bookIds)
+                .orElseThrow(() -> new Exception("Books could not found."));
+
+        if(books.size() != bookIds.size())
+            throw new Exception("There are book identity that could not found.");
+
+        return books.parallelStream().map(Book::toDTO).collect(Collectors.toList());
     }
 }

@@ -6,6 +6,8 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
+
 @Builder
 @Data
 @Document
@@ -15,14 +17,14 @@ public class Book
     private String id;
     private String name;
     private String author;
-    private String category;
+    private BigDecimal price;
 
     public BookDTO toDTO() {
         return BookDTO.builder()
                 .bookId(this.id)
                 .bookName(this.name)
                 .bookAuthor(this.author)
-                .bookCategory(this.category)
+                .bookPrice(this.price)
                 .build();
     }
 }
