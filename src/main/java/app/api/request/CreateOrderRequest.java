@@ -15,7 +15,7 @@ import java.util.List;
 public class CreateOrderRequest extends BaseApiRequest
 {
     @NotNull
-    private List<BookOrderDTO> books;
+    private List<BookOrderDTO> bookOrders;
 
     @NotBlank(message = "Customer id is mandatory")
     private String customerId;
