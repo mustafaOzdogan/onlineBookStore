@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -77,5 +79,18 @@ public class BookStockServiceImpl implements BookStockService
                 .orElseThrow(() -> new Exception("Book stock could not found"));
 
         return bookstock;
+    }
+
+    @SneakyThrows
+    @Override
+    public List<BookStock> getBookStocks(List<String> bookIds)
+    {
+        if(bookIds.isEmpty() || Objects.isNull(bookIds))
+            throw new Exception("Book identity list cannot be empty.");
+
+        List<BookStock> bookStocks = bookStockRepository.findBookStockByBookIDIn(bookIds)
+                .orElseThrow(() -> new Exception("Book stock could not found."));
+
+        return bookStocks;
     }
 }
